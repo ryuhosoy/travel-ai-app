@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { flightInspiration } from "@/lib/duffel";
+import { flightInspiration } from "@/lib/ignav";
 import { DEPARTURE_IATA } from "@/lib/iata";
 import {
   buildLocktripSearchUrl,
@@ -228,17 +228,19 @@ export async function POST(req: NextRequest) {
           estimatedTotal: flightPrice + hotelPrice,
           departureDate: item.departureDate,
           returnDate: item.returnDate,
-          flightUrl: buildSkyscannerUrl({
-            from: originIata,
-            to: iata,
-            depart: item.departureDate,
-            return: item.returnDate,
-          }),
+          flightUrl:
+            item.flightUrl ||
+            buildSkyscannerUrl({
+              from: originIata,
+              to: iata,
+              depart: item.departureDate,
+              return: item.returnDate,
+            }),
           hotelUrl,
         });
       }
     } catch {
-      // Duffel API が失敗した場合は AI にフォールバック
+      // Ignav API が失敗した場合は AI にフォールバック
     }
 
     if (destinations.length === 0) {

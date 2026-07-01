@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateTravelPlan } from "@/lib/claude";
-import { searchFlights, formatPrice } from "@/lib/duffel";
+import { searchFlights, formatPrice } from "@/lib/ignav";
 import { getIataCode } from "@/lib/iata";
 import {
   buildLocktripSearchUrl,
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
     const plan = await generateTravelPlan({ message });
 
-    // Duffel API でフライト検索
+    // Ignav API でフライト検索
     let cheapestFlight = null;
     let flightOffers: Awaited<ReturnType<typeof searchFlights>> = [];
     let flightSearchError = null;
@@ -47,13 +47,15 @@ export async function POST(req: NextRequest) {
     const destIataForLink = plan.destinationIata || getIataCode(plan.destination) || "CDG";
     const cityEn = getCityEn(plan.destination);
 
-    const flightUrl = buildSkyscannerUrl({
-      from: "KIX",
-      to: destIataForLink,
-      depart: plan.departureDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-      return: plan.returnDate,
-      adults: plan.adults || 1,
-    });
+    const flightUrl =
+      flightOffers[0]?.bookingUrl ||
+      buildSkyscannerUrl({
+        from: "KIX",
+        to: destIataForLink,
+        depart: plan.departureDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+        return: plan.returnDate,
+        adults: plan.adults || 1,
+      });
 
     // LockTrip API でホテル検索
     let hotels: Awaited<ReturnType<typeof searchHotels>> = [];

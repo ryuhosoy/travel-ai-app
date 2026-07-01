@@ -271,7 +271,7 @@ export default function Home() {
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--text-secondary)", fontSize: 14, marginBottom: 4 }}>
                   <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
-                  AIがプランを作成中…Duffelで航空券を検索中…
+                  AIがプランを作成中…Ignavで航空券を検索中…
                 </div>
                 {[90, 140, 70, 100].map((h, i) => (
                   <div key={i} className="skeleton" style={{ height: h }} />
@@ -297,7 +297,7 @@ export default function Home() {
 
                 {/* Flights */}
                 {result.hasRealFlights && (
-                  <Section title={`✈️ 航空券（Duffelリアルタイム価格 · ${result.flights.length}件）`}>
+                  <Section title={`✈️ 航空券（Ignav実価格 · ${result.flights.length}件）`}>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {result.flights.map((f, i) => (
                         <FlightCard key={i} f={f} url={result.flightUrl} />
@@ -309,7 +309,7 @@ export default function Home() {
                       border: "1px solid var(--accent)", color: "var(--accent)",
                       textDecoration: "none", fontWeight: 500,
                     }}>
-                      Skyscannerで全便を比較 <ExternalLink size={13} />
+                      予約サイトで全便を比較 <ExternalLink size={13} />
                     </a>
                   </Section>
                 )}
@@ -321,10 +321,10 @@ export default function Home() {
                     color: "var(--accent)", marginBottom: 14, display: "flex", alignItems: "center", gap: 8,
                   }}>
                     <Info size={14} />
-                    Duffelの検索結果は参考価格です。Skyscannerで実際の便をご確認ください。
+                    Ignavの検索結果は参考価格です。予約サイトで実際の便をご確認ください。
                     <a href={result.flightUrl} target="_blank" rel="noopener noreferrer"
                       style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4, textDecoration: "none", fontWeight: 600 }}>
-                      Skyscanner <ExternalLink size={12} />
+                      予約サイト <ExternalLink size={12} />
                     </a>
                   </div>
                 )}
@@ -383,7 +383,7 @@ export default function Home() {
                       <span style={{
                         marginLeft: 8, fontSize: 12, fontWeight: 500, padding: "2px 8px",
                         background: "var(--success-light)", color: "var(--success)", borderRadius: 6,
-                      }}>航空券はDuffel実価格</span>
+                      }}>航空券はIgnav実価格</span>
                     )}
                     {result.hasRealHotels && (
                       <span style={{
@@ -466,7 +466,7 @@ export default function Home() {
                 最安値の目的地
               </h1>
               <p style={{ color: "var(--text-secondary)", fontSize: 15 }}>
-                Duffelの航空券・LockTripのホテルデータから最安値の旅先を提案します
+                Ignavの航空券・LockTripのホテルデータから最安値の旅先を提案します
               </p>
             </div>
 
@@ -518,7 +518,7 @@ export default function Home() {
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
               }}>
                 {cheapLoading
-                  ? <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />Duffelで検索中…</>
+                  ? <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />Ignavで検索中…</>
                   : <><Search size={16} />最安の目的地を探す</>}
               </button>
             </div>
@@ -548,7 +548,7 @@ export default function Home() {
                     <span style={{
                       fontSize: 11, fontWeight: 600, padding: "2px 8px",
                       background: "var(--success-light)", color: "var(--success)", borderRadius: 6,
-                    }}>Duffelリアルタイム</span>
+                    }}>Ignav実価格</span>
                   )}
                   {usedRealHotels && (
                     <span style={{
