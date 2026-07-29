@@ -47,15 +47,35 @@ export async function POST(req: NextRequest) {
     const destIataForLink = plan.destinationIata || getIataCode(plan.destination) || "CDG";
     const cityEn = getCityEn(plan.destination);
 
+    const skyscannerParams = {
+      from: "KIX",
+      to: destIataForLink,
+      depart: plan.departureDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      return: plan.returnDate,
+      adults: plan.adults || 1,
+    };
+
+    const flights = flightOffers.slice(0, 3).map((offer) => ({
+      airline: offer.airline,
+      flightNo: offer.flightNo,
+      departure: offer.departure,
+      arrival: offer.arrival,
+      departureTime: offer.departureTime,
+      arrivalTime: offer.arrivalTime,
+      duration: offer.duration,
+      price: formatPrice(offer.price, offer.currency),
+      priceRaw: Math.round(offer.price),
+      seats: offer.seats,
+      url: offer.bookingUrl || buildSkyscannerUrl(skyscannerParams),
+      isIgnavLink: !!offer.bookingUrl,
+    }));
+
     const flightUrl =
-      flightOffers[0]?.bookingUrl ||
-      buildSkyscannerUrl({
-        from: "KIX",
-        to: destIataForLink,
-        depart: plan.departureDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-        return: plan.returnDate,
-        adults: plan.adults || 1,
-      });
+      flights.find((f) => f.isIgnavLink)?.url ||
+      flights[0]?.url ||
+      buildSkyscannerUrl(skyscannerParams);
+
+    const hasIgnavBookingLinks = flights.some((f) => f.isIgnavLink);
 
     // LockTrip API でホテル検索
     let hotels: Awaited<ReturnType<typeof searchHotels>> = [];
@@ -94,19 +114,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const flights = flightOffers.slice(0, 3).map((offer) => ({
-      airline: offer.airline,
-      flightNo: offer.flightNo,
-      departure: offer.departure,
-      arrival: offer.arrival,
-      departureTime: offer.departureTime,
-      arrivalTime: offer.arrivalTime,
-      duration: offer.duration,
-      price: formatPrice(offer.price, offer.currency),
-      priceRaw: Math.round(offer.price),
-      seats: offer.seats,
-    }));
-
     const hotelCards = hotels.slice(0, 3).map((h) => ({
       id: h.id,
       name: h.name,
@@ -125,6 +132,7 @@ export async function POST(req: NextRequest) {
       hotelSearchError,
       hasRealFlights: flights.length > 0,
       hasRealHotels,
+      hasIgnavBookingLinks,
       nights: nightsBetween(plan.departureDate, plan.returnDate),
     });
   } catch (error: unknown) {

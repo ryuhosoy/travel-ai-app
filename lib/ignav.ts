@@ -161,17 +161,33 @@ async function ignavRequest<T>(
   return data as T;
 }
 
-async function fetchBookingUrl(ignavId: string, market = DEFAULT_MARKET): Promise<string | null> {
+async function fetchBookingUrl(offer: FlightOffer): Promise<string | null> {
   try {
+    // Option 1: ignav_id のみ（manual フィールドと併用すると 400 になる）
     const data = await ignavRequest<BookingLinksResponse>("/api/fares/booking-links", {
-      ignav_id: ignavId,
-      market,
+      ignav_id: offer.id,
     });
+
+    // 検索価格に最も近いリンクを優先（なければ先頭）
+    let bestUrl: string | null = null;
+    let bestDiff = Infinity;
+
     for (const option of data.booking_options || []) {
-      const link = option.links?.[0];
-      if (link?.url) return link.url;
+      for (const link of option.links || []) {
+        if (!link.url) continue;
+        if (!link.price?.amount) {
+          bestUrl = bestUrl || link.url;
+          continue;
+        }
+        const diff = Math.abs(link.price.amount - offer.price);
+        if (diff < bestDiff) {
+          bestDiff = diff;
+          bestUrl = link.url;
+        }
+      }
     }
-    return null;
+
+    return bestUrl;
   } catch {
     return null;
   }
@@ -263,7 +279,7 @@ export async function searchFlights(params: {
 
   await Promise.all(
     offers.map(async (offer) => {
-      offer.bookingUrl = (await fetchBookingUrl(offer.id)) || undefined;
+      offer.bookingUrl = (await fetchBookingUrl(offer)) || undefined;
     })
   );
 

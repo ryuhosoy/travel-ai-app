@@ -10,6 +10,7 @@ type FlightOffer = {
   airline: string; flightNo: string; departure: string; arrival: string;
   departureTime: string; arrivalTime: string; duration: string;
   price: string; priceRaw: number; seats: number;
+  url: string; isIgnavLink?: boolean;
 };
 type TravelPlan = {
   destination: string; destinationEn: string; destinationIata: string;
@@ -25,7 +26,7 @@ type HotelOffer = {
 type PlanResult = {
   plan: TravelPlan; flights: FlightOffer[]; hotels: HotelOffer[];
   flightUrl: string; hotelUrl: string;
-  hasRealFlights: boolean; hasRealHotels: boolean;
+  hasRealFlights: boolean; hasRealHotels: boolean; hasIgnavBookingLinks?: boolean;
   flightSearchError?: string; hotelSearchError?: string; nights?: number;
 };
 type Destination = {
@@ -76,9 +77,9 @@ function HotelCard({ h }: { h: HotelOffer }) {
   );
 }
 
-function FlightCard({ f, url }: { f: FlightOffer; url: string }) {
+function FlightCard({ f }: { f: FlightOffer }) {
   return (
-    <a href={url} target="_blank" rel="noopener noreferrer" style={{
+    <a href={f.url} target="_blank" rel="noopener noreferrer" style={{
       display: "flex", alignItems: "center", justifyContent: "space-between",
       padding: "12px 16px", borderRadius: 10,
       border: "1px solid var(--border)", background: "var(--surface)",
@@ -99,7 +100,9 @@ function FlightCard({ f, url }: { f: FlightOffer; url: string }) {
       </div>
       <div style={{ textAlign: "right" }}>
         <div style={{ fontSize: 16, fontWeight: 700, color: "var(--accent)" }}>{f.price}</div>
-        <div style={{ fontSize: 11, color: "var(--text-muted)" }}>残{f.seats}席</div>
+        <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+          {f.isIgnavLink ? "予約へ" : `残${f.seats}席`}
+        </div>
       </div>
     </a>
   );
@@ -300,7 +303,7 @@ export default function Home() {
                   <Section title={`✈️ 航空券（Ignav実価格 · ${result.flights.length}件）`}>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {result.flights.map((f, i) => (
-                        <FlightCard key={i} f={f} url={result.flightUrl} />
+                        <FlightCard key={i} f={f} />
                       ))}
                     </div>
                     <a href={result.flightUrl} target="_blank" rel="noopener noreferrer" style={{
@@ -309,7 +312,7 @@ export default function Home() {
                       border: "1px solid var(--accent)", color: "var(--accent)",
                       textDecoration: "none", fontWeight: 500,
                     }}>
-                      予約サイトで全便を比較 <ExternalLink size={13} />
+                      {result.hasIgnavBookingLinks ? "最安便を予約する" : "予約サイトで全便を比較"} <ExternalLink size={13} />
                     </a>
                   </Section>
                 )}
@@ -440,7 +443,7 @@ export default function Home() {
                     padding: "13px 16px", borderRadius: 10, textDecoration: "none",
                     background: "var(--accent)", color: "#fff", fontWeight: 600, fontSize: 14,
                   }}>
-                    <Plane size={15} />航空券を比較
+                    <Plane size={15} />{result.hasIgnavBookingLinks ? "最安便を予約" : "航空券を比較"}
                     <ExternalLink size={13} style={{ opacity: 0.8 }} />
                   </a>
                   <a href={result.hotelUrl} target="_blank" rel="noopener noreferrer" style={{
